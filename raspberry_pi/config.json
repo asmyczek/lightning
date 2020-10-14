@@ -1,0 +1,20 @@
+{
+  "sensor": {
+    "bus": 1,
+    "capacitance": 12,
+    "location": "indoors",
+    "disturber_detection": true
+  },
+  "mqtt": {
+    "client_name": "lightning-sensor",
+    "broker": "localhost",
+    "user": "user",
+    "password": "pass",
+    "port": 1883,
+    "topic": "lightning"
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file": null
+  }
+}
