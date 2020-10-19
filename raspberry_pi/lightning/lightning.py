@@ -7,6 +7,7 @@ import logging
 import paho.mqtt.client as mqtt
 from json import dumps
 from datetime import datetime
+from threading import Timer
 
 
 I2C_ADDRESS = 0X03  # 0X01, 0X02, 0X03
@@ -37,7 +38,7 @@ def create_client(config):
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.on_publish = on_publish
-    client.will_set(f'{config("mqtt", "topic")}/status', 'offline', qos=0, retain=False)
+    client.will_set(f'{config("mqtt", "topic")}/status', 'offline', qos=0, retain=True)
     return client
 
 
@@ -76,6 +77,13 @@ def mk_callback_handler(sensor, mqtt, config):
     return handler
 
 
+def start_ping(config, mqtt):
+    def ping():
+        mqtt.publish(f'{config("mqtt", "topic")}/ping', retain=False)
+        Timer(300, ping).start()
+    ping()
+
+
 def start_sensor(config):
 
     sensor = DFRobotAS3935(I2C_ADDRESS,
@@ -93,6 +101,8 @@ def start_sensor(config):
             logging.info('Sensor initialized.')
             GPIO.add_event_detect(IRQ_PIN, GPIO.RISING, callback=mk_callback_handler(sensor, mqtt, config))
             logging.info('Starting lightning detection...')
+            mqtt.publish(f'{config("mqtt", "topic")}/status', payload='online', qos=0, retain=True)
+            start_ping(config, mqtt)
             mqtt.loop_forever()
         else:
             logging.fatal('Sensor initialization failed.')
