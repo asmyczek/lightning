@@ -1,0 +1,18 @@
+# systemd service
+# Drop the file in /lib/systemd/system/, update lightning path and run:
+# sudo systemctl enable lightning.service
+# sudo systemctl start lightning.service
+
+[Unit]
+Description=Lightning Detector Service
+After=multi-user.target
+ 
+[Service]
+Type=simple
+Environment=LIGHTNING_PATH={path_to_lightning_dir}
+WorkingDirectory={path_to_lightning_dir}
+ExecStart={path_to_lightning_dir}/start.sh
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target
